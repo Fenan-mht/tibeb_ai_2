@@ -506,19 +506,24 @@ Agent: this is the only section of the playbook you edit. Update it after every 
 Agent: rewrite this block after every change; keep it to these lines.
 
 ```text
-Phase: 0 — Accounts, tools and repo
-Step: 0.2 — Repo scaffold (finished, ready to commit)
+Phase: 1 — Backend core, library and question bank
+Step: 1.1 — Config and provider layer (finished, ready to commit)
 Last updated: 2026-10-15
-Next action: git init, commit and push to private repository (HUMAN TASK 0.2)
-Waiting on human: create empty private GitHub repo, commit and push
-Tests: make test (1 passed in 0.66s), flutter test (1 passed)
-Uncommitted work: repo scaffold files
+Next action: Step 1.2 Database and migrations
+Waiting on human: review & commit Step 1.1
+Tests: make test (12 passed in 3.39s), make smoke (passed)
+Uncommitted work: api/app/config.py, api/app/providers/, api/tests/test_config.py, api/tests/test_providers.py, api/scripts/smoke_check.py, docs/playbook.md
 ```
 
 ### Decisions
 
 - 2026-10-15: Python 3.12 managed via uv; Make (GnuWin32) added to User PATH; Android mobile device connected via Wi-Fi debugging.
 - 2026-10-15: Postgres test-db port mapped to 5435 to avoid port collision with local postgres on 5432/5433.
+- 2026-10-15: Supabase IPv4 connection established via aws-1-eu-central-1 pooler; pgvector confirmed enabled.
+- 2026-10-15: Google Cloud TTS setup deferred to Phase 4 (no billing card available yet). FakeTTS used across all tests; make smoke skips TTS when GOOGLE_APPLICATION_CREDENTIALS is unset.
+- 2026-10-15: Chapa test key deferred to Phase 5 (step 5.3). FakePayments used across all tests; make smoke skips Chapa when CHAPA_SECRET_KEY is unset. Phase 0 gate covers Groq and Supabase live checks.
+- 2026-10-15: Tutor & smoke Groq models aligned with available models (openai/gpt-oss-120b and openai/gpt-oss-20b per architecture doc).
+- 2026-10-15: Phase 0 gate passed by human. Starting Phase 1 (Backend core).
 
 ### Known issues
 
@@ -527,6 +532,69 @@ Uncommitted work: repo scaffold files
 ### Log (newest first)
 
 Agent: add each entry at the top, in this format.
+
+#### 2026-10-15 14:24 — Step 1.1 Config and provider layer — done
+
+Changed: api/app/config.py, api/app/providers/base.py, api/app/providers/fakes.py, api/app/providers/groq.py, api/app/providers/local_store.py, api/app/providers/registry.py, api/app/providers/__init__.py, api/tests/test_config.py, api/tests/test_providers.py, docs/playbook.md
+What: implemented Pydantic Settings with YAML config merger and production security validation (refuses AUTH_MODE=none in production); built abstract provider interfaces (ChatModel, Embedder, TTS, STT, FileStore, Payments) with UsageRecord reporting; built complete test fakes and Groq/LocalFileStore implementations; added 11 unit tests covering config and providers
+Tests: make test → 12 passed
+Half-done: none
+Next: Step 1.2 Database and migrations (SQLAlchemy models and Alembic migrations for data model tables)
+Waiting on human: review & commit
+
+#### 2026-10-15 14:06 — Phase 0 Gate passed — starting Step 1.1 Config and provider layer
+
+Changed: docs/playbook.md
+What: Phase 0 gate approved by human; transitioning to Phase 1, Step 1.1 (Config and provider layer)
+Tests: make test → 1 passed; make smoke → passed
+Half-done: none
+Next: Step 1.1 Config loader, provider interfaces, implementations and fakes
+Waiting on human: nothing
+
+#### 2026-10-15 14:03 — Step 0.4 Smoke check — done
+
+Changed: api/scripts/smoke_check.py, api/config/test.yaml, docs/playbook.md
+What: created smoke check script verifying Groq API completion (openai/gpt-oss-20b) and Supabase database connectivity with pgvector; skips deferred Google Cloud TTS and Chapa gracefully; updated test.yaml model mapping
+Tests: make smoke → Groq & Supabase PASSED; make test → 1 passed
+Half-done: none
+Next: PHASE GATE for Phase 0
+Waiting on human: Gate confirmation
+
+#### 2026-10-15 13:58 — Step 0.3 Accounts and keys — done
+
+Changed: docs/playbook.md, api/.env
+What: Step 0.3 completed; Groq API key set and validated; Supabase database and pgvector extension verified; Google Cloud TTS deferred to Phase 4; Chapa deferred to Phase 5 (step 5.3); FakeTTS and FakePayments used for tests
+Tests: make test → 1 passed; live Supabase query → pgvector extension confirmed
+Half-done: none
+Next: Step 0.4 Smoke check (build api/scripts/smoke_check.py with skips for deferred services)
+Waiting on human: Google Cloud TTS deferred to Phase 4; Chapa deferred to Step 5.3
+
+#### 2026-10-15 13:46 — Step 0.3 Accounts and keys — in progress
+
+Changed: docs/playbook.md, api/.env
+What: Supabase database connection verified successfully via psycopg; confirmed extensions including pgvector; moving to service 3 (Google Cloud Text-to-Speech)
+Tests: make test → 1 passed; live Supabase query → pgvector extension confirmed
+Half-done: Groq and Supabase configured; Google Cloud and Chapa pending in order
+Next: present Google Cloud HUMAN TASK, verify service account key in api/secrets/
+Waiting on human: Google Cloud TTS service account JSON in api/secrets/ and GOOGLE_APPLICATION_CREDENTIALS in api/.env
+
+#### 2026-10-15 13:23 — Step 0.3 Accounts and keys — in progress
+
+Changed: docs/playbook.md, api/.env
+What: Groq API key set in api/.env; moving to service 2 (Supabase database with pgvector)
+Tests: make test → 1 passed
+Half-done: Groq key set; Supabase, Google Cloud, and Chapa pending in order
+Next: present Supabase HUMAN TASK, verify connection string in api/.env
+Waiting on human: Supabase project created, vector extension enabled, and DATABASE_URL in api/.env
+
+#### 2026-10-15 13:19 — Step 0.3 Accounts and keys — in progress
+
+Changed: docs/playbook.md, api/.env
+What: verified initial commit and push to private repository; initiated Step 0.3 with service 1 (Groq API key)
+Tests: make test → 1 passed
+Half-done: Groq key requested; Supabase, Google Cloud, and Chapa pending in order
+Next: verify Groq key, then present Supabase HUMAN TASK
+Waiting on human: GROQ_API_KEY in api/.env
 
 #### 2026-10-15 12:06 — Step 0.2 Repo scaffold — done
 
