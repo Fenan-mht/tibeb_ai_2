@@ -507,12 +507,12 @@ Agent: rewrite this block after every change; keep it to these lines.
 
 ```text
 Phase: 1 — Backend core, library and question bank
-Step: 1.1 — Config and provider layer (finished, ready to commit)
+Step: 1.2 — Database and migrations (done)
 Last updated: 2026-10-15
-Next action: Step 1.2 Database and migrations
-Waiting on human: review & commit Step 1.1
-Tests: make test (12 passed in 3.39s), make smoke (passed)
-Uncommitted work: api/app/config.py, api/app/providers/, api/tests/test_config.py, api/tests/test_providers.py, api/scripts/smoke_check.py, docs/playbook.md
+Next action: Step 1.3 Test-mode identity
+Waiting on human: review & commit
+Tests: make test (13 passed in 2.95s), make smoke (passed)
+Uncommitted work: api/app/db/, api/alembic.ini, api/tests/test_migrations.py, docs/playbook.md
 ```
 
 ### Decisions
@@ -523,6 +523,7 @@ Uncommitted work: api/app/config.py, api/app/providers/, api/tests/test_config.p
 - 2026-10-15: Google Cloud TTS setup deferred to Phase 4 (no billing card available yet). FakeTTS used across all tests; make smoke skips TTS when GOOGLE_APPLICATION_CREDENTIALS is unset.
 - 2026-10-15: Chapa test key deferred to Phase 5 (step 5.3). FakePayments used across all tests; make smoke skips Chapa when CHAPA_SECRET_KEY is unset. Phase 0 gate covers Groq and Supabase live checks.
 - 2026-10-15: Tutor & smoke Groq models aligned with available models (openai/gpt-oss-120b and openai/gpt-oss-20b per architecture doc).
+- 2026-10-15: Row Level Security (RLS) enabled on all 21 application tables via Alembic migration 002_enable_rls; locks down public PostgREST endpoints while keeping full access for backend pooler connection.
 - 2026-10-15: Phase 0 gate passed by human. Starting Phase 1 (Backend core).
 
 ### Known issues
@@ -532,6 +533,42 @@ Uncommitted work: api/app/config.py, api/app/providers/, api/tests/test_config.p
 ### Log (newest first)
 
 Agent: add each entry at the top, in this format.
+
+#### 2026-10-15 17:20 — Step 1.2 Database and migrations — done
+
+Changed: api/app/db/migrations/versions/002_enable_rls.py, api/tests/test_migrations.py, docs/playbook.md
+What: created migration 002_enable_rls enabling Row Level Security (RLS) on all 21 application tables; executed on test-db container and Supabase; verified rowsecurity is True across all tables in Supabase; all 13 tests pass
+Tests: make test → 13 passed; Supabase rowsecurity query → 21 tables True
+Half-done: none
+Next: Step 1.3 Test-mode identity (AUTH_MODE=none with X-Tester-Id, seed_testers.py, isolation tests)
+Waiting on human: review & commit
+
+#### 2026-10-15 17:15 — Step 1.2 Database and migrations — done
+
+Changed: api/app/db/base.py, api/app/db/models.py, api/app/db/__init__.py, api/alembic.ini, api/app/db/migrations/, api/tests/test_migrations.py, docs/playbook.md
+What: applied migration 001_initial_schema to Supabase PostgreSQL database; verified all 22 tables present in public schema, seeded grades (9-12), core subjects (7), and plans (4); confirmed HNSW pgvector index on chunks; ran test suite on local test-db container (13 passed)
+Tests: make test → 13 passed; Supabase schema query → 22 tables verified
+Half-done: none
+Next: Step 1.3 Test-mode identity (AUTH_MODE=none with X-Tester-Id, seed_testers.py, isolation tests)
+Waiting on human: review & commit
+
+#### 2026-10-15 16:29 — Step 1.2 Database and migrations — in progress
+
+Changed: api/app/db/base.py, api/app/db/models.py, api/app/db/__init__.py, api/alembic.ini, api/app/db/migrations/, api/tests/test_migrations.py, docs/playbook.md
+What: created SQLAlchemy 2.0 declarative models for all 21 tables; created Alembic migration 001_initial_schema with pgvector HNSW index and seed data for grades (9-12), subjects (7 core), and plans (4 tiers); verified migration applies cleanly on test-db container; test_migrations passed
+Tests: make test → 13 passed
+Half-done: models and local migrations done; waiting for Supabase migration execution
+Next: HUMAN TASK 1.2 (run make migrate against Supabase, verify table editor)
+Waiting on human: run make migrate against Supabase and confirm tables
+
+#### 2026-10-15 16:02 — Step 1.2 Database and migrations — in progress
+
+Changed: docs/playbook.md
+What: starting Step 1.2; building SQLAlchemy models for all 21 data model tables, Alembic migrations with HNSW pgvector index, and seed data for grades, subjects, and plans
+Tests: make test → 12 passed
+Half-done: models and migrations in progress
+Next: write models.py, configure Alembic, create initial migration with seed data, verify on test-db container
+Waiting on human: nothing
 
 #### 2026-10-15 14:24 — Step 1.1 Config and provider layer — done
 
