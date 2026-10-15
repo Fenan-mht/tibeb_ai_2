@@ -507,12 +507,12 @@ Agent: rewrite this block after every change; keep it to these lines.
 
 ```text
 Phase: 1 — Backend core, library and question bank
-Step: 1.2 — Database and migrations (done)
+Step: 1.3 — Test-mode identity (done)
 Last updated: 2026-10-15
-Next action: Step 1.3 Test-mode identity
+Next action: Step 1.4 Library ingestion
 Waiting on human: review & commit
-Tests: make test (13 passed in 2.95s), make smoke (passed)
-Uncommitted work: api/app/db/, api/alembic.ini, api/tests/test_migrations.py, docs/playbook.md
+Tests: make test (18 passed in 4.65s), make smoke (passed)
+Uncommitted work: api/app/auth.py, api/app/routes/auth.py, api/app/main.py, api/app/config.py, api/scripts/seed_testers.py, api/tests/test_auth.py, api/pyproject.toml, docs/playbook.md
 ```
 
 ### Decisions
@@ -524,6 +524,7 @@ Uncommitted work: api/app/db/, api/alembic.ini, api/tests/test_migrations.py, do
 - 2026-10-15: Chapa test key deferred to Phase 5 (step 5.3). FakePayments used across all tests; make smoke skips Chapa when CHAPA_SECRET_KEY is unset. Phase 0 gate covers Groq and Supabase live checks.
 - 2026-10-15: Tutor & smoke Groq models aligned with available models (openai/gpt-oss-120b and openai/gpt-oss-20b per architecture doc).
 - 2026-10-15: Row Level Security (RLS) enabled on all 21 application tables via Alembic migration 002_enable_rls; locks down public PostgREST endpoints while keeping full access for backend pooler connection.
+- 2026-10-15: Test-mode identity uses X-Tester-Id header with AUTH_MODE=none. 10 testers seeded across Free, Basic, Premium, and Tester tiers in test-db and Supabase.
 - 2026-10-15: Phase 0 gate passed by human. Starting Phase 1 (Backend core).
 
 ### Known issues
@@ -533,6 +534,15 @@ Uncommitted work: api/app/db/, api/alembic.ini, api/tests/test_migrations.py, do
 ### Log (newest first)
 
 Agent: add each entry at the top, in this format.
+
+#### 2026-10-15 17:55 — Step 1.3 Test-mode identity — done
+
+Changed: api/app/auth.py, api/app/routes/auth.py, api/app/main.py, api/app/config.py, api/scripts/seed_testers.py, api/tests/test_auth.py, api/pyproject.toml, docs/playbook.md
+What: implemented test-mode identity via get_current_user dependency supporting AUTH_MODE=none with X-Tester-Id header; created GET /v1/me and GET /v1/auth/testers endpoints; created seed_testers.py script and seeded 10 testers on Free, Basic, Premium, and Tester tiers in local test-db and Supabase; added 5 test cases verifying missing/unknown tester rejection, profile retrieval, tester listing, and student data isolation
+Tests: make test → 18 passed; make smoke → passed
+Half-done: none
+Next: Step 1.4 Library ingestion (scripts/import_books.py with PyMuPDF chunking and BGE-M3 embeddings)
+Waiting on human: review & commit
 
 #### 2026-10-15 17:20 — Step 1.2 Database and migrations — done
 

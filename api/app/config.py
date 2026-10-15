@@ -4,6 +4,7 @@ Loads environment variables from .env and task provider selections from YAML.
 Enforces security constraints (e.g., refuses AUTH_MODE=none in production).
 """
 
+from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
@@ -101,8 +102,8 @@ class Settings(BaseSettings):
         return self
 
 
-def get_settings(env_file: str | None = None, **kwargs) -> Settings:
-    """Helper to instantiate settings with optional overrides."""
-    if env_file:
-        return Settings(_env_file=env_file, **kwargs)
-    return Settings(**kwargs)
+@lru_cache
+def get_settings() -> Settings:
+    """Helper to instantiate cached application settings."""
+    return Settings()
+
