@@ -1,0 +1,85 @@
+# Environment and Secrets (Playbook Rule 13)
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+api/secrets/
+*service_account*.json
+*credentials*.json
+
+# Data and Model Caches (Playbook Rule 13)
+data/
+api/data/
+models/
+huggingface/
+.cache/
+*.mp3
+*.wav
+*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+env/
+venv/
+ENV/
+
+# Redis / DB local volumes
+redis_data/
+pg_data/
+
+# Flutter / Dart (mobile)
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/.pub-cache/
+mobile/.pub/
+mobile/build/
+mobile/ios/Flutter/.last_build_id
+mobile/android/app/debug/
+mobile/android/app/profile/
+mobile/android/app/release/
+
+# Node / Admin portal
+admin/node_modules/
+admin/.next/
+admin/out/
+admin/dist/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.log

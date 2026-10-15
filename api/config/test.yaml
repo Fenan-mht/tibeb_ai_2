@@ -1,0 +1,21 @@
+chat:
+  tutor:
+    provider: groq
+    model: llama-3.3-70b-versatile
+  flashcards:
+    provider: groq
+    model: llama-3.1-8b-instant
+embedder:
+  provider: local
+  model: BAAI/bge-m3
+stt:
+  provider: none
+tts:
+  provider: google
+  voice: am-ET-Wavenet-B
+storage:
+  provider: local
+  path: ./data/files
+payments:
+  provider: chapa
+  mode: test
