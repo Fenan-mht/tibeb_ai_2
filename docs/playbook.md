@@ -507,12 +507,12 @@ Agent: rewrite this block after every change; keep it to these lines.
 
 ```text
 Phase: 1 — Backend core, library and question bank
-Step: 1.3 — Test-mode identity (done)
-Last updated: 2026-10-15
-Next action: Step 1.4 Library ingestion
+Step: 1.4 — Library ingestion (done)
+Last updated: 2026-10-16
+Next action: Step 1.5 Question bank import
 Waiting on human: review & commit
-Tests: make test (18 passed in 4.65s), make smoke (passed)
-Uncommitted work: api/app/auth.py, api/app/routes/auth.py, api/app/main.py, api/app/config.py, api/scripts/seed_testers.py, api/tests/test_auth.py, api/pyproject.toml, docs/playbook.md
+Tests: make test (22 passed in 13.01s), make smoke (passed)
+Uncommitted work: api/app/services/ingestion.py, api/scripts/import_books.py, api/data/books/, api/tests/test_ingestion.py, api/pyproject.toml, api/uv.lock, docs/playbook.md
 ```
 
 ### Decisions
@@ -525,6 +525,8 @@ Uncommitted work: api/app/auth.py, api/app/routes/auth.py, api/app/main.py, api/
 - 2026-10-15: Tutor & smoke Groq models aligned with available models (openai/gpt-oss-120b and openai/gpt-oss-20b per architecture doc).
 - 2026-10-15: Row Level Security (RLS) enabled on all 21 application tables via Alembic migration 002_enable_rls; locks down public PostgREST endpoints while keeping full access for backend pooler connection.
 - 2026-10-15: Test-mode identity uses X-Tester-Id header with AUTH_MODE=none. 10 testers seeded across Free, Basic, Premium, and Tester tiers in test-db and Supabase.
+- 2026-10-16: Added pymupdf for PDF text extraction. Ingestion pipeline enforces strict page-scoped chunking (never crossing page boundaries) and detects scanned PDFs (>30% of pages with <50 chars).
+- 2026-10-16: Grade 12 Chemistry (298 pages, 296 chunks, 5 units) ingested into Supabase and test-db with SHA-256 deduplication. Grade 12 Biology was identified as scanned image-only PDF (97.2% empty text) and safely rejected.
 - 2026-10-15: Phase 0 gate passed by human. Starting Phase 1 (Backend core).
 
 ### Known issues
@@ -534,6 +536,15 @@ Uncommitted work: api/app/auth.py, api/app/routes/auth.py, api/app/main.py, api/
 ### Log (newest first)
 
 Agent: add each entry at the top, in this format.
+
+#### 2026-10-16 11:20 — Step 1.4 Library ingestion — done
+
+Changed: api/app/services/ingestion.py, api/scripts/import_books.py, api/data/books/grade-12-chemistry.yaml, api/tests/test_ingestion.py, api/pyproject.toml, api/uv.lock, docs/playbook.md
+What: completed Step 1.4 library ingestion; extracted and analyzed textbook PDFs; generated chapter manifest grade-12-chemistry.yaml across all 5 units; successfully ingested Grade 12 Chemistry into Supabase and test-db (296 page-scoped chunks); verified deduplication skipping via text_hash; verified scanned-PDF rejection against Grade 12 Biology (97.2% image pages); all 22 automated tests pass
+Tests: make test → 22 passed; make smoke → passed; dry-run & live ingestion → 296 chunks verified
+Half-done: none
+Next: Step 1.5 Question bank import (sample questions format and import_questions.py)
+Waiting on human: review & commit
 
 #### 2026-10-15 17:55 — Step 1.3 Test-mode identity — done
 
